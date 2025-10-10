@@ -23,12 +23,12 @@ const Header = () => {
     <header className="header">
       <div className="header__top">
         <Link to="/" className="header__logo">
-          <span className="header__logoText">amazon</span>
+          <span className="header__logoText">DRV STORE</span>
         </Link>
 
         <div className="header__delivery">
-          <span className="header__lineOne">Deliver to</span>
-          <span className="header__lineTwo">New York 10001</span>
+          <span className="header__lineOne">DEVANDOODY</span>
+          <span className="header__lineTwo">ANCHETTY </span>
         </div>
 
         <form className="header__search" onSubmit={handleSearch}>

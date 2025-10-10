@@ -16,7 +16,7 @@ function safeParse(key, fallback) {
 // ✅ Initial state (using safe parse)
 const initialState = {
   user: safeParse("user", null),
-  cart: safeParse("cart", { items: [], total: 0, itemCount: 0 }),
+  cart: safeParse("cart", null) || { items: [], total: 0, itemCount: 0 },
   products: [],
 };
 
@@ -30,29 +30,28 @@ function appReducer(state, action) {
       return { ...state, user: null };
 
     case "ADD_TO_CART": {
-      // ✅ Ensure cart structure always exists
-      const cart = state.cart || { items: [], total: 0, itemCount: 0 };
-      const existingItem = cart.items.find(
-        (item) => item.id === action.payload.id
-      );
+      const cart = state.cart || {};
+      const items = Array.isArray(cart.items) ? cart.items : [];
+
+      const existingItem = items.find((item) => item.id === action.payload.id);
 
       let newItems;
       if (existingItem) {
-        newItems = cart.items.map((item) =>
+        newItems = items.map((item) =>
           item.id === action.payload.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: (item.quantity || 0) + 1 }
             : item
         );
       } else {
-        newItems = [...cart.items, { ...action.payload, quantity: 1 }];
+        newItems = [...items, { ...action.payload, quantity: 1 }];
       }
 
       const newTotal = newItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
         0
       );
       const newItemCount = newItems.reduce(
-        (sum, item) => sum + item.quantity,
+        (sum, item) => sum + (item.quantity || 0),
         0
       );
 
@@ -67,17 +66,17 @@ function appReducer(state, action) {
     }
 
     case "REMOVE_FROM_CART": {
-      const cart = state.cart || { items: [], total: 0, itemCount: 0 };
-      const filteredItems = cart.items.filter(
-        (item) => item.id !== action.payload
-      );
+      const cart = state.cart || {};
+      const items = Array.isArray(cart.items) ? cart.items : [];
 
-      const removedTotal = filteredItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+      const filteredItems = items.filter((item) => item.id !== action.payload);
+
+      const newTotal = filteredItems.reduce(
+        (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
         0
       );
-      const removedCount = filteredItems.reduce(
-        (sum, item) => sum + item.quantity,
+      const newItemCount = filteredItems.reduce(
+        (sum, item) => sum + (item.quantity || 0),
         0
       );
 
@@ -85,26 +84,28 @@ function appReducer(state, action) {
         ...state,
         cart: {
           items: filteredItems,
-          total: removedTotal,
-          itemCount: removedCount,
+          total: newTotal,
+          itemCount: newItemCount,
         },
       };
     }
 
     case "UPDATE_QUANTITY": {
-      const cart = state.cart || { items: [], total: 0, itemCount: 0 };
-      const updatedItems = cart.items.map((item) =>
+      const cart = state.cart || {};
+      const items = Array.isArray(cart.items) ? cart.items : [];
+
+      const updatedItems = items.map((item) =>
         item.id === action.payload.id
-          ? { ...item, quantity: action.payload.quantity }
+          ? { ...item, quantity: action.payload.quantity || 0 }
           : item
       );
 
-      const updatedTotal = updatedItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+      const newTotal = updatedItems.reduce(
+        (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
         0
       );
-      const updatedCount = updatedItems.reduce(
-        (sum, item) => sum + item.quantity,
+      const newItemCount = updatedItems.reduce(
+        (sum, item) => sum + (item.quantity || 0),
         0
       );
 
@@ -112,8 +113,8 @@ function appReducer(state, action) {
         ...state,
         cart: {
           items: updatedItems,
-          total: updatedTotal,
-          itemCount: updatedCount,
+          total: newTotal,
+          itemCount: newItemCount,
         },
       };
     }
