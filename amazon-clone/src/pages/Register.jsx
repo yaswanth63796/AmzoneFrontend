@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
-import './Auth.css'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import './Auth.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,78 +9,81 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: ''
-  })
-  const [errors, setErrors] = useState({})
-  const { dispatch } = useApp()
-  const navigate = useNavigate()
+  });
+  const [errors, setErrors] = useState({});
+  const { dispatch } = useApp();
+  const navigate = useNavigate();
 
   // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    })
-  }
+    });
+  };
 
   // Form validation
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
-    if (!formData.name) newErrors.name = 'Name is required'
+    if (!formData.name) newErrors.name = 'Name is required';
 
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
+      newErrors.email = 'Email is invalid';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Submit form
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
     try {
-      const response = await fetch('https://amazonebackend-b1ma.onrender.com/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        })
-      })
+      const response = await fetch(
+        'https://amazonebackend-b1ma.onrender.com/api/register', // Deployed backend URL
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password
+          })
+        }
+      );
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
         dispatch({
           type: 'SET_USER',
           payload: { name: data.user.name, email: data.user.email }
-        })
-        navigate('/')
+        });
+        navigate('/');
       } else {
-        setErrors({ api: data.error || 'Registration failed' })
+        setErrors({ api: data.error || 'Registration failed' });
       }
     } catch (error) {
-      console.error('Registration error:', error)
-      setErrors({ api: 'Something went wrong. Please try again later.' })
+      console.error('Registration error:', error);
+      setErrors({ api: 'Something went wrong. Please try again later.' });
     }
-  }
+  };
 
   return (
     <div className="auth">
@@ -165,8 +168,7 @@ const Register = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
-
+export default Register;
