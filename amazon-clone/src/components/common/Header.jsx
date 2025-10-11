@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Search, ShoppingCart, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 
 const Header = () => {
@@ -16,9 +17,9 @@ const Header = () => {
   }, []);
 
   const navigation = [
-    { name: 'Home', href: '#' },
+    { name: 'Home', href: '/' },
     { name: 'Products', href: '#' },
-    { name: 'About', href: '#' },
+    { name: 'About', href: '#t' },
     { name: 'Contact', href: '#' },
   ];
 
@@ -30,22 +31,22 @@ const Header = () => {
         <div className="nav">
           {/* Logo */}
           <div className="logo">
-            <h1 className={`logo-text ${themeClass}`}>
-              Brand
-            </h1>
+            <Link to="/">
+              <h1 className={`logo-text ${themeClass}`}>Brand</h1>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="desktop-nav">
             <div className="nav-items">
               {navigation.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={`nav-link ${themeClass}`}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -55,12 +56,14 @@ const Header = () => {
             <button className={`icon-button ${themeClass}`}>
               <Search className={`icon ${themeClass}`} />
             </button>
-            <button className={`icon-button ${themeClass}`}>
+            {/* Cart navigates to /cart */}
+            <Link to="/cart" className={`icon-button ${themeClass}`}>
               <ShoppingCart className={`icon ${themeClass}`} />
-            </button>
-            <button className={`icon-button ${themeClass}`}>
+            </Link>
+            {/* Profile / Sign-In */}
+            <Link to="/login" className={`icon-button ${themeClass}`}>
               <User className={`icon ${themeClass}`} />
-            </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -72,7 +75,11 @@ const Header = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`mobile-menu-button ${themeClass}`}
             >
-              {isMenuOpen ? <X className="mobile-menu-icon" /> : <Menu className="mobile-menu-icon" />}
+              {isMenuOpen ? (
+                <X className="mobile-menu-icon" />
+              ) : (
+                <Menu className="mobile-menu-icon" />
+              )}
             </button>
           </div>
         </div>
@@ -83,22 +90,30 @@ const Header = () => {
             <div className={`mobile-nav-content ${themeClass}`}>
               <div className="mobile-nav-items">
                 {navigation.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
+                    to={item.href}
                     className="mobile-nav-link"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
                 <div className="mobile-nav-icons">
-                  <button className="mobile-nav-icon-button">
+                  <Link
+                    to="/cart"
+                    className="mobile-nav-icon-button"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <ShoppingCart className="mobile-nav-icon" />
-                  </button>
-                  <button className="mobile-nav-icon-button">
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="mobile-nav-icon-button"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <User className="mobile-nav-icon" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
