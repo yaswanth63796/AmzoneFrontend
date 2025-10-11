@@ -12,9 +12,10 @@ const Login = () => {
   const { dispatch } = useApp();
   const navigate = useNavigate();
 
-  // Use your Render backend URL
-  const API_URL = 'https://amazonebackend-b1ma.onrender.com';
+  // ✅ Your deployed backend URL
+  const API_URL = 'https://amazonebackend-b1ma.onrender.com/api/login';
 
+  // Handle input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,6 +23,7 @@ const Login = () => {
     });
   };
 
+  // Validate form inputs
   const validateForm = () => {
     const newErrors = {};
 
@@ -41,13 +43,14 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,7 +62,7 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Save user in context
+        // ✅ Save user in global context
         dispatch({
           type: 'SET_USER',
           payload: { name: data.user.name, email: data.user.email }
