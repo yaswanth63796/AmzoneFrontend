@@ -1,8 +1,7 @@
-
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
-import './Auth.css'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import './Auth.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,60 +9,70 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: ''
-  })
-  const [errors, setErrors] = useState({})
-  const { dispatch } = useApp()
-  const navigate = useNavigate()
+  });
+  const [errors, setErrors] = useState({});
+  const { dispatch } = useApp();
+  const navigate = useNavigate();
+
+  const API_URL = 'https://amazonebackend-b1ma.onrender.com';
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const validateForm = () => {
-    const newErrors = {}
-    
-    if (!formData.name) {
-      newErrors.name = 'Name is required'
-    }
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    const newErrors = {};
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (validateForm()) {
-      // Mock registration - in real app, this would be an API call
-      dispatch({
-        type: 'SET_USER',
-        payload: {
-          email: formData.email,
-          name: formData.name
-        }
-      })
-      navigate('/')
+    if (!formData.name) newErrors.name = 'Name is required';
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
     }
-  }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: 'SET_USER', payload: { name: data.user.name, email: data.user.email } });
+        navigate('/');
+      } else {
+        setErrors({ api: data.error || 'Registration failed' });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrors({ api: 'Something went wrong. Please try again later.' });
+    }
+  };
 
   return (
     <div className="auth">
@@ -73,7 +82,7 @@ const Register = () => {
 
       <div className="auth__container">
         <h1>Create Account</h1>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="auth__field">
             <label htmlFor="name">Your name</label>
@@ -128,9 +137,9 @@ const Register = () => {
             {errors.confirmPassword && <span className="auth__error">{errors.confirmPassword}</span>}
           </div>
 
-          <button type="submit" className="auth__button">
-            Continue
-          </button>
+          <button type="submit" className="auth__button">Continue</button>
+
+          {errors.api && <div className="auth__error api-error">{errors.api}</div>}
         </form>
 
         <p className="auth__terms">
@@ -141,12 +150,11 @@ const Register = () => {
           <span>Already have an account?</span>
         </div>
 
-        <Link to="/login" className="auth__createButton">
-          Sign in
-        </Link>
+        <Link to="/login" className="auth__createButton">Sign in</Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
+

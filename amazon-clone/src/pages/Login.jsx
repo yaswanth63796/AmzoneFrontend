@@ -1,58 +1,78 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
-import './Auth.css'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import './Auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
-  })
-  const [errors, setErrors] = useState({})
-  const { dispatch } = useApp()
-  const navigate = useNavigate()
+  });
+  const [errors, setErrors] = useState({});
+  const { dispatch } = useApp();
+  const navigate = useNavigate();
+
+  // Use your Render backend URL
+  const API_URL = 'https://amazonebackend-b1ma.onrender.com';
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    })
-  }
+    });
+  };
 
   const validateForm = () => {
-    const newErrors = {}
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    const newErrors = {};
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (validateForm()) {
-      // Mock login - in real app, this would be an API call
-      dispatch({
-        type: 'SET_USER',
-        payload: {
-          email: formData.email,
-          name: formData.email.split('@')[0]
-        }
-      })
-      navigate('/')
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
     }
-  }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save user in context
+        dispatch({
+          type: 'SET_USER',
+          payload: { name: data.user.name, email: data.user.email }
+        });
+        navigate('/');
+      } else {
+        setErrors({ api: data.error || 'Login failed' });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ api: 'Server error. Please try again later.' });
+    }
+  };
 
   return (
     <div className="auth">
@@ -62,7 +82,7 @@ const Login = () => {
 
       <div className="auth__container">
         <h1>Sign-In</h1>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="auth__field">
             <label htmlFor="email">Email or mobile phone number</label>
@@ -93,6 +113,8 @@ const Login = () => {
           <button type="submit" className="auth__button">
             Continue
           </button>
+
+          {errors.api && <div className="auth__error api-error">{errors.api}</div>}
         </form>
 
         <p className="auth__terms">
@@ -108,7 +130,7 @@ const Login = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
