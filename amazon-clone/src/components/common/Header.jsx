@@ -1,100 +1,112 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../../context/AppContext'
-import './Header.css'
+import { useState, useEffect } from 'react';
+import { Menu, X, Search, ShoppingCart, User } from 'lucide-react';
+import './Header.css';
 
 const Header = () => {
-  const { state, dispatch } = useApp()
-  const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const handleLogout = () => {
-    dispatch({ type: 'LOGOUT' })
-    navigate('/')
-  }
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    // Search functionality would go here
-    console.log('Searching for:', searchTerm)
-  }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navigation = [
+    { name: 'Home', href: '#' },
+    { name: 'Products', href: '#' },
+    { name: 'About', href: '#' },
+    { name: 'Contact', href: '#' },
+  ];
+
+  const themeClass = isScrolled ? 'scrolled' : 'transparent';
 
   return (
-    <header className="header">
-      <div className="header__top">
-        <Link to="/" className="header__logo">
-          <span className="header__logoText">DRV STORE</span>
-        </Link>
-
-        <div className="header__delivery">
-          <span className="header__lineOne">DEVANDOODY</span>
-          <span className="header__lineTwo">ANCHETTY </span>
-        </div>
-
-        <form className="header__search" onSubmit={handleSearch}>
-          <select className="header__searchSelect">
-            <option>All</option>
-            <option>Electronics</option>
-            <option>Books</option>
-            <option>Home</option>
-          </select>
-          <input
-            type="text"
-            className="header__searchInput"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button type="submit" className="header__searchButton">
-            🔍
-          </button>
-        </form>
-
-        <div className="header__nav">
-          <div className="header__option">
-            <span className="header__lineOne">Hello,</span>
-            {state.user ? (
-              <span className="header__lineTwo" onClick={handleLogout}>
-                Sign Out
-              </span>
-            ) : (
-              <Link to="/login" className="header__lineTwo">
-                Sign In
-              </Link>
-            )}
+    <header className={`header ${themeClass}`}>
+      <nav className="nav-container">
+        <div className="nav">
+          {/* Logo */}
+          <div className="logo">
+            <h1 className={`logo-text ${themeClass}`}>
+              Brand
+            </h1>
           </div>
 
-          <div className="header__option">
-            <span className="header__lineOne">Returns</span>
-            <span className="header__lineTwo">& Orders</span>
+          {/* Desktop Navigation */}
+          <div className="desktop-nav">
+            <div className="nav-items">
+              {navigation.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className={`nav-link ${themeClass}`}
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
           </div>
 
-          <div className="header__option">
-            <span className="header__lineOne">Your</span>
-            <span className="header__lineTwo">Prime</span>
+          {/* Right side icons */}
+          <div className="icons-container">
+            <button className={`icon-button ${themeClass}`}>
+              <Search className={`icon ${themeClass}`} />
+            </button>
+            <button className={`icon-button ${themeClass}`}>
+              <ShoppingCart className={`icon ${themeClass}`} />
+            </button>
+            <button className={`icon-button ${themeClass}`}>
+              <User className={`icon ${themeClass}`} />
+            </button>
           </div>
 
-          <Link to="/cart" className="header__optionBasket">
-            🛒
-            <span className="header__basketCount">{state.cart.itemCount}</span>
-          </Link>
+          {/* Mobile menu button */}
+          <div className="mobile-icons">
+            <button className={`icon-button ${themeClass}`}>
+              <Search className={`icon ${themeClass}`} />
+            </button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`mobile-menu-button ${themeClass}`}
+            >
+              {isMenuOpen ? <X className="mobile-menu-icon" /> : <Menu className="mobile-menu-icon" />}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="header__bottom">
-        <div className="header__bottomLeft">
-          <span>All</span>
-          <span>Today's Deals</span>
-          <span>Customer Service</span>
-          <span>Registry</span>
-          <span>Gift Cards</span>
-          <span>Sell</span>
-        </div>
-        <div className="header__bottomRight">
-          <span>Shop deals in Electronics</span>
-        </div>
-      </div>
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="mobile-nav">
+            <div className={`mobile-nav-content ${themeClass}`}>
+              <div className="mobile-nav-items">
+                {navigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="mobile-nav-link"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+                <div className="mobile-nav-icons">
+                  <button className="mobile-nav-icon-button">
+                    <ShoppingCart className="mobile-nav-icon" />
+                  </button>
+                  <button className="mobile-nav-icon-button">
+                    <User className="mobile-nav-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
