@@ -11,7 +11,7 @@ const Home = () => {
       <div className="home__container">
         <img
           className="home__image"
-          src="https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1200"
+          src="https://media.istockphoto.com/id/1279960855/photo/woman-diwali-celebrate-stock-photo.jpg?s=2048x2048&w=is&k=20&c=DbKd0P-hsVV9ZqC4rEaH9pWTInCcYQbIvKjEY5lca-8="
           alt="Amazon Banner"
         />
 
