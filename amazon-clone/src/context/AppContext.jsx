@@ -137,65 +137,22 @@ export function AppProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(state.cart));
   }, [state.user, state.cart]);
 
-  // Mock Products
+  // Fetch products from backend
   useEffect(() => {
-    const mockProducts = [
-      {
-        id: 1,
-        title: "Wireless Bluetooth Headphones",
-        price: 79.99,
-        image:
-          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300",
-        rating: 4,
-        reviews: 1250,
-      },
-      {
-        id: 2,
-        title: "Smart Watch Series 5",
-        price: 199.99,
-        image:
-          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300",
-        rating: 5,
-        reviews: 892,
-      },
-      {
-        id: 3,
-        title: "Laptop Backpack",
-        price: 45.99,
-        image:
-          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300",
-        rating: 4,
-        reviews: 567,
-      },
-      {
-        id: 4,
-        title: "Wireless Mouse",
-        price: 29.99,
-        image:
-          "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300",
-        rating: 4,
-        reviews: 2341,
-      },
-      {
-        id: 5,
-        title: "Mechanical Keyboard",
-        price: 89.99,
-        image:
-          "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300",
-        rating: 5,
-        reviews: 678,
-      },
-      {
-        id: 6,
-        title: "USB-C Hub Adapter",
-        price: 39.99,
-        image:
-          "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=300",
-        rating: 4,
-        reviews: 1567,
-      },
-    ];
-    dispatch({ type: "SET_PRODUCTS", payload: mockProducts });
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(
+          "https://amazonebackend-b1ma.onrender.com/api/products"
+        );
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data = await res.json();
+        dispatch({ type: "SET_PRODUCTS", payload: data });
+      } catch (err) {
+        console.error("Products fetch error:", err);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   return (
