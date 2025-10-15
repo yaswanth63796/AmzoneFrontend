@@ -1,47 +1,95 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
 import './Cart.css'
 
+const BACKEND_URL = 'https://amazonebackend-b1ma.onrender.com/api/cart'
+
 const Cart = () => {
-  const { state, dispatch } = useApp()
+  const [cartItems, setCartItems] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // ✅ Safe defaults
-  const cartItems = state?.cart?.items || []
-  const itemCount = state?.cart?.itemCount || 0
-  const total = state?.cart?.total || 0
-
-  const updateQuantity = (id, quantity) => {
-    if (quantity === 0) {
-      dispatch({ type: 'REMOVE_FROM_CART', payload: id })
-    } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } })
+  // 🧠 Fetch cart items from backend
+  const fetchCart = async () => {
+    try {
+      const res = await fetch(BACKEND_URL)
+      const data = await res.json()
+      setCartItems(data)
+    } catch (error) {
+      console.error('Error fetching cart:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const removeItem = (id) => {
-    dispatch({ type: 'REMOVE_FROM_CART', payload: id })
+  useEffect(() => {
+    fetchCart()
+  }, [])
+
+  // 🟢 Increment quantity
+  const incrementQuantity = async (id, currentQuantity) => {
+    try {
+      await fetch(`${BACKEND_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: currentQuantity + 1 }),
+      })
+      fetchCart()
+    } catch (error) {
+      console.error('Error incrementing quantity:', error)
+    }
   }
 
-  const incrementQuantity = (id, currentQuantity) => {
-    updateQuantity(id, currentQuantity + 1)
-  }
-
-  const decrementQuantity = (id, currentQuantity) => {
+  // 🔻 Decrement quantity (delete if goes to 0)
+  const decrementQuantity = async (id, currentQuantity) => {
     if (currentQuantity > 1) {
-      updateQuantity(id, currentQuantity - 1)
+      try {
+        await fetch(`${BACKEND_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: currentQuantity - 1 }),
+        })
+        fetchCart()
+      } catch (error) {
+        console.error('Error decrementing quantity:', error)
+      }
     } else {
       removeItem(id)
     }
   }
 
-  const clearCart = () => {
-    cartItems.forEach(item => {
-      dispatch({ type: 'REMOVE_FROM_CART', payload: item.id })
-    })
+  // ❌ Remove item
+  const removeItem = async (id) => {
+    try {
+      await fetch(`${BACKEND_URL}/${id}`, {
+        method: 'DELETE',
+      })
+      fetchCart()
+    } catch (error) {
+      console.error('Error removing item:', error)
+    }
   }
 
-  // ✅ Handle empty cart
+  // 🧹 Clear all items
+  const clearCart = async () => {
+    try {
+      await fetch(BACKEND_URL, {
+        method: 'DELETE',
+      })
+      fetchCart()
+    } catch (error) {
+      console.error('Error clearing cart:', error)
+    }
+  }
+
+  // 🧮 Calculate totals
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  if (loading) {
+    return <div className="cart"><h2>Loading cart...</h2></div>
+  }
+
+  // 🛍 Empty cart message
   if (cartItems.length === 0) {
     return (
       <div className="cart">
@@ -68,10 +116,10 @@ const Cart = () => {
     )
   }
 
-  // ✅ Render cart items
   return (
     <div className="cart">
       <div className="cart__container">
+        {/* LEFT SIDE */}
         <div className="cart__left">
           <div className="cart__header">
             <h1>Shopping Cart</h1>
@@ -146,6 +194,7 @@ const Cart = () => {
           </div>
         </div>
 
+        {/* RIGHT SIDE */}
         <div className="cart__right">
           <div className="cart__checkout">
             <div className="cart__checkoutHeader">
@@ -185,3 +234,4 @@ const Cart = () => {
 }
 
 export default Cart
+
